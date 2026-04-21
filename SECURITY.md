@@ -3,7 +3,7 @@
 **Project:** Tool-14 — ISO 27001 Compliance Manager  
 **Sprint:** 14 April 2026 – 9 May 2026  
 **Author:** AI Developer 3  
-**Status:** Initial Draft — Day 1  
+**Status:** Updated — Day 2  
 
 ---
 
@@ -84,15 +84,28 @@ If the Flask service inserts this directly into the Groq prompt without sanitisa
 **Status:** Input sanitisation middleware assigned to AI Developer 3 — Day 3.
 
 ---
-## 3. Additional Threats Specific to This Tool (Day 2 — to be completed)
 
-The following 5 threats specific to an AI-powered compliance management tool will be documented on Day 2:
+### Risk 3 — A07: Identification and Authentication Failures
 
-1. Groq API key exposure via logs or error responses
-2. ChromaDB data poisoning via crafted document ingestion
-3. AI response hallucination presenting false compliance status to decision-makers
-4. Redis cache poisoning — serving stale or manipulated AI responses
-5. Excessive AI token consumption via automated bulk requests (resource exhaustion)
+**Description:**  
+Weak or improperly implemented JWT authentication allows attackers to forge tokens, reuse expired tokens, or bypass authentication entirely.
+
+**Attack Scenario:**  
+The JWT secret key is hardcoded in `application.yml` as a short, guessable string (e.g., `secret123`). An attacker uses an offline brute-force tool (e.g., `hashcat` with a JWT module) to crack the secret. They then forge a token with `"role": "ADMIN"` and gain full administrative access to the API without a valid account.
+
+**Attack Scenario 2:**  
+The `JwtAuthFilter` is misconfigured and accidentally permits all requests to `/api/**` instead of only `/auth/**`. All endpoints become publicly accessible without any token.
+
+**Mitigation:**
+- Store the JWT secret exclusively in `.env` as `JWT_SECRET` and reference it via `${JWT_SECRET}` in `application.yml`. Never hardcode.
+- Use a minimum 256-bit randomly generated secret (generate with: `openssl rand -base64 32`).
+- Set a short token expiry (e.g., 15–60 minutes) with a separate refresh token flow.
+- In `SecurityConfig`, explicitly permit only `/auth/**` and require authentication on all other paths.
+- Add `.env` to `.gitignore` on Day 1 — before the first commit.
+
+**Status:** JWT implementation assigned to Java Developer 1 — Day 5. Secret rotation procedure to be documented.
+
+---
 
 ### Risk 4 — A05: Security Misconfiguration
 
@@ -147,29 +160,154 @@ During an ISO 27001 external audit, the absence of this evidence constitutes a n
 
 ---
 
-## 3. Additional Threats Specific to This Tool (Day 2 — to be completed)
+## 3. Additional Threats Specific to This Tool (Day 2)
 
-The following 5 threats specific to an AI-powered compliance management tool will be documented on Day 2:
+### Threat 1 — Groq API Key Exposure via Logs or Error Responses
 
-1. Groq API key exposure via logs or error responses
-2. ChromaDB data poisoning via crafted document ingestion
-3. AI response hallucination presenting false compliance status to decision-makers
-4. Redis cache poisoning — serving stale or manipulated AI responses
-5. Excessive AI token consumption via automated bulk requests (resource exhaustion)
+**Attack Vector:**  
+The Groq API key is accidentally printed in Flask error logs or included in an HTTP error response when the Groq API call fails. An attacker who gains access to the server logs or intercepts an unhandled error response can extract the key.
+
+Example of a dangerous unhandled error:
+```python
+# BAD — never do this
+return jsonify({"error": str(e), "config": os.environ}), 500
+```
+
+**Damage Potential:**
+- Attacker uses the stolen Groq API key to make unlimited AI requests billed to the project account
+- Project loses all free tier credits immediately
+- Groq account may be suspended for abuse
+- All AI features in the tool stop working — critical failure on Demo Day
+- Sensitive system configuration may be leaked alongside the key
+
+**Mitigation Plan:**
+- Store Groq API key only in `.env` as `GROQ_API_KEY`
+- Reference via `os.getenv("GROQ_API_KEY")` — never hardcode in any file
+- Wrap every Groq API call in try-except and return only a safe error message
+- Never expose environment variables in error responses
+- Add `.env` to `.gitignore` on Day 1 before first commit
+- Rotate the key immediately if accidental exposure is suspected
+
+**Status:** Mitigation to be implemented — Day 3
+
+---
+
+### Threat 2 — ChromaDB Data Poisoning via Crafted Document Ingestion
+
+**Attack Vector:**  
+An attacker with MANAGER role access uploads a specially crafted document to the POST /analyse-document endpoint. The document contains misleading compliance information designed to corrupt the ChromaDB vector store. Once ingested, all future RAG queries return poisoned results — presenting false ISO 27001 compliance guidance to all users.
+
+**Damage Potential:**
+- All RAG-powered AI responses return incorrect compliance advice
+- Organisation makes wrong ISO 27001 decisions based on poisoned AI guidance
+- Audit findings are missed because AI incorrectly marks controls as compliant
+- Trust in the entire compliance management tool is destroyed
+- Very difficult to detect — poisoned vectors look exactly like normal data
+
+**Mitigation Plan:**
+- Validate all documents before ChromaDB ingestion — check file type, size, and content structure
+- Restrict document ingestion to ADMIN role only via `@PreAuthorize` in Spring Boot
+- Maintain a separate clean backup of the ChromaDB collection
+- Log all document ingestion events in the `audit_log` table with the uploader's user ID
+- Periodically re-seed ChromaDB from verified clean sources only
+
+**Status:** Mitigation to be implemented — Day 5 (RAG pipeline)
+
+---
+
+### Threat 3 — AI Hallucination Presenting False Compliance Status
+
+**Attack Vector:**  
+The Groq LLaMA model confidently generates incorrect ISO 27001 compliance assessments — marking a control as "Compliant" when it is actually "Non-Compliant", or inventing audit requirements that do not exist in the ISO 27001 standard. This is not a traditional cyberattack but an inherent AI risk that can cause serious business damage if outputs are trusted without human review.
+
+Example hallucination scenario:
+A user asks the AI to assess Control A.12.1.1 (Documented Operating Procedures). The AI confidently states the control is fully compliant based on a vague description, missing critical evidence gaps that a human auditor would catch.
+
+**Damage Potential:**
+- Organisation fails an ISO 27001 external audit due to AI-generated false compliance reports
+- Compliance Manager presents incorrect status to board based on AI output
+- Legal and regulatory consequences if false compliance status is submitted to certifying body
+- Reputational damage to the organisation
+- Financial losses from failed certification attempt
+
+**Mitigation Plan:**
+- Add clear disclaimer on all AI outputs in the UI: "AI-generated analysis — must be reviewed by a qualified compliance officer before use"
+- Set Groq temperature to 0.3 for factual compliance assessments to reduce hallucination risk
+- Include `{is_fallback: true}` flag in meta when confidence is low
+- Never allow AI output to automatically update compliance status without human approval
+- Add confidence score (0.0-1.0) to all AI responses so users know how reliable the output is
+
+**Status:** Disclaimer UI to be implemented — Day 7
+
+---
+
+### Threat 4 — Redis Cache Poisoning
+
+**Attack Vector:**  
+An attacker manipulates the SHA256 cache key generation logic in the Flask AI service to cause a malicious response to be stored in Redis cache. When legitimate users make the same AI query, they receive the poisoned cached response instead of a fresh Groq API call. Since the cache TTL is 15 minutes, the attack affects all users for up to 15 minutes per poisoned entry.
+
+Example attack:
+Attacker crafts an input that generates the same SHA256 key as a common compliance query (hash collision or logic flaw). Their malicious AI response gets cached and served to all users querying the same endpoint.
+
+**Damage Potential:**
+- All users receive manipulated AI compliance advice for up to 15 minutes
+- Poisoned responses look legitimate and are difficult to detect in real time
+- Could cause incorrect compliance decisions across the entire organisation
+- Undermines user trust in the AI system completely
+
+**Mitigation Plan:**
+- Generate cache keys using SHA256 of the full sanitised input — never cache unsanitised input
+- Include user role in cache key to prevent cross-role cache sharing
+- Set Redis cache TTL to maximum 15 minutes as specified in the project spec
+- Add cache hit/miss counters to GET /health endpoint for monitoring
+- Allow ADMIN role to manually flush Redis cache via a dedicated endpoint
+
+**Status:** Redis cache implementation — Day 8
+
+---
+
+### Threat 5 — Excessive AI Token Consumption via Automated Bulk Requests
+
+**Attack Vector:**  
+An attacker or a misconfigured client script sends hundreds of automated requests per minute to the Flask AI endpoints — particularly POST /generate-report and POST /batch-process which consume the most Groq API tokens per request. This exhausts the free tier token quota, causing all AI features to stop working.
+
+Example attack script:
+```python
+# Attacker runs this in a loop
+while True:
+    requests.post("http://localhost:5000/generate-report",
+                  json={"data": "x" * 10000})
+```
+
+**Damage Potential:**
+- Groq free tier quota exhausted within minutes
+- All AI endpoints return errors for all users
+- Complete AI feature failure — critical on Demo Day
+- If paid tier is used, unexpected charges accumulate rapidly
+- Denial of Service for all legitimate users
+
+**Mitigation Plan:**
+- Implement flask-limiter with 30 req/min default rate limit on all endpoints
+- Apply stricter 10 req/min limit specifically on /generate-report and /batch-process
+- Return HTTP 429 with `retry_after` field on rate limit breach
+- Log all rate limit breaches with IP address and timestamp
+- Validate and cap input length — reject inputs exceeding 5000 characters with HTTP 400
+
+**Status:** flask-limiter implementation assigned — Day 4
 
 ---
 
 ## 4. Test Log (Updated Each Friday)
 
-| Week | Test Type          | Tester           | Findings | Status    |
-|------|--------------------|------------------|----------|-----------|
-| W1   | Manual endpoint testing (Day 5) | AI Developer 3 | Pending  | Scheduled |
-| W2   | OWASP ZAP baseline (Day 7)      | AI Developer 3 | Pending  | Scheduled |
-| W2   | ZAP findings fix (Day 8)        | AI Developer 3 | Pending  | Scheduled |
-| W3   | OWASP ZAP active scan (Day 11)  | AI Developer 3 | Pending  | Scheduled |
-| W3   | Full stack security test (Day 13)| AI Developer 3 | Pending  | Scheduled |
-| W3   | PII audit (Day 9)               | AI Developer 3 | Pending  | Scheduled |
-| W4   | Final security checklist (Day 15)| All Members    | Pending  | Scheduled |
+| Week | Test Type                        | Tester          | Findings | Status    |
+|------|----------------------------------|-----------------|----------|-----------|
+| W1   | Manual endpoint testing (Day 5)  | AI Developer 3  | Pending  | Scheduled |
+| W2   | OWASP ZAP baseline (Day 7)       | AI Developer 3  | Pending  | Scheduled |
+| W2   | ZAP findings fix (Day 8)         | AI Developer 3  | Pending  | Scheduled |
+| W3   | OWASP ZAP active scan (Day 11)   | AI Developer 3  | Pending  | Scheduled |
+| W3   | Full stack security test (Day 13)| AI Developer 3  | Pending  | Scheduled |
+| W3   | PII audit (Day 9)                | AI Developer 3  | Pending  | Scheduled |
+| W4   | Final security checklist (Day 15)| All Members     | Pending  | Scheduled |
 
 ---
 
@@ -193,4 +331,4 @@ To be completed after Week 3 testing. Will include any Medium-severity ZAP findi
 
 ---
 
-*Tool-14 — ISO 27001 Compliance Manager | SECURITY.md | Last updated: Day 1 — 14 April 2026*
+*Tool-14 — ISO 27001 Compliance Manager | SECURITY.md | Last updated: Day 2 — 15 April 2026*
