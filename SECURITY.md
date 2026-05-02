@@ -299,15 +299,19 @@ while True:
 
 ## 4. Test Log (Updated Each Friday)
 
+
+
 | Week | Test Type                        | Tester          | Findings | Status    |
 |------|----------------------------------|-----------------|----------|-----------|
-| W1   | Manual endpoint testing (Day 5)  | AI Developer 3  | Pending  | Scheduled |
+| W1   | Manual endpoint testing (Day 5)  | AI Developer 3  | 10 tests — 10 Pass, 0 Fail | Completed |
 | W2   | OWASP ZAP baseline (Day 7)       | AI Developer 3  | Pending  | Scheduled |
 | W2   | ZAP findings fix (Day 8)         | AI Developer 3  | Pending  | Scheduled |
 | W3   | OWASP ZAP active scan (Day 11)   | AI Developer 3  | Pending  | Scheduled |
 | W3   | Full stack security test (Day 13)| AI Developer 3  | Pending  | Scheduled |
 | W3   | PII audit (Day 9)                | AI Developer 3  | Pending  | Scheduled |
 | W4   | Final security checklist (Day 15)| All Members     | Pending  | Scheduled |
+
+--- 
 
 ---
 
@@ -331,4 +335,4 @@ To be completed after Week 3 testing. Will include any Medium-severity ZAP findi
 
 ---
 
-*Tool-14 — ISO 27001 Compliance Manager | SECURITY.md | Last updated: Day 2 — 15 April 2026*
+*Tool-14 — ISO 27001 Compliance Manager | SECURITY.md | Last updated: Day 5 — 18 April 2026*
