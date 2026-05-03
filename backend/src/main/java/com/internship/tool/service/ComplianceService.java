@@ -12,10 +12,14 @@ import java.util.List;
 public class ComplianceService {
 
     private final List<ComplianceRecord> records = new ArrayList<>();
+    private Long counter = 1L; // 🔥 ID generator
 
     // CREATE
     public ComplianceRecord createRecord(ComplianceRecord record) {
         validate(record);
+
+        record.setId(counter++); // ✅ FIX: assign ID manually
+
         records.add(record);
         return record;
     }
@@ -28,7 +32,7 @@ public class ComplianceService {
     // GET BY ID
     public ComplianceRecord getRecordById(Long id) {
         return records.stream()
-                .filter(r -> r.getId().equals(id))
+                .filter(r -> r.getId() != null && r.getId().equals(id)) // ✅ safe check
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("Record not found"));
     }
