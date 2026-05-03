@@ -3,37 +3,34 @@ package com.internship.tool.service;
 import com.internship.tool.entity.ComplianceRecord;
 import com.internship.tool.exception.ResourceNotFoundException;
 import com.internship.tool.exception.ValidationException;
+import com.internship.tool.repository.ComplianceRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class ComplianceService {
 
-    private final List<ComplianceRecord> records = new ArrayList<>();
-    private Long counter = 1L; // 🔥 ID generator
+    private final ComplianceRepository repository;
+
+    public ComplianceService(ComplianceRepository repository) {
+        this.repository = repository;
+    }
 
     // CREATE
     public ComplianceRecord createRecord(ComplianceRecord record) {
         validate(record);
-
-        record.setId(counter++); // ✅ FIX: assign ID manually
-
-        records.add(record);
-        return record;
+        return repository.save(record); // 🔥 real DB save
     }
 
     // GET ALL
     public List<ComplianceRecord> getAllRecords() {
-        return records;
+        return repository.findAll();
     }
 
     // GET BY ID
     public ComplianceRecord getRecordById(Long id) {
-        return records.stream()
-                .filter(r -> r.getId() != null && r.getId().equals(id)) // ✅ safe check
-                .findFirst()
+        return repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Record not found"));
     }
 
