@@ -299,15 +299,32 @@ while True:
 
 ## 4. Test Log (Updated Each Friday)
 
+
+
 | Week | Test Type                        | Tester          | Findings | Status    |
 |------|----------------------------------|-----------------|----------|-----------|
-| W1   | Manual endpoint testing (Day 5)  | AI Developer 3  | Pending  | Scheduled |
-| W2   | OWASP ZAP baseline (Day 7)       | AI Developer 3  | Pending  | Scheduled |
+| W1   | Manual endpoint testing (Day 5)  | AI Developer 3  | 10 tests — 10 Pass, 0 Fail | Completed |
+| W2   | OWASP ZAP baseline (Day 7)       | AI Developer 3  | 3 findings — 1 Medium, 2 Low | Completed |
 | W2   | ZAP findings fix (Day 8)         | AI Developer 3  | Pending  | Scheduled |
 | W3   | OWASP ZAP active scan (Day 11)   | AI Developer 3  | Pending  | Scheduled |
 | W3   | Full stack security test (Day 13)| AI Developer 3  | Pending  | Scheduled |
 | W3   | PII audit (Day 9)                | AI Developer 3  | Pending  | Scheduled |
 | W4   | Final security checklist (Day 15)| All Members     | Pending  | Scheduled |
+
+--- 
+## 4.1 ZAP Baseline Scan Findings (Day 7)
+
+| # | Alert | Severity | Status |
+|---|---|---|---|
+| 1 | Content Security Policy (CSP) Header Not Set | 🟡 Medium | To be fixed Day 8 |
+| 2 | Server Leaks Version Information via Server Header | 🔵 Low | To be fixed Day 8 |
+| 3 | X-Content-Type-Options Header Missing | 🔵 Low | To be fixed Day 8 |
+
+**Remediation Plan:**
+- Add CSP header to Flask responses via flask-talisman
+- Hide server version information in Flask config
+- Add X-Content-Type-Options header to all responses
+
 
 ---
 
@@ -331,4 +348,4 @@ To be completed after Week 3 testing. Will include any Medium-severity ZAP findi
 
 ---
 
-*Tool-14 — ISO 27001 Compliance Manager | SECURITY.md | Last updated: Day 2 — 15 April 2026*
+*Tool-14 — ISO 27001 Compliance Manager | SECURITY.md |Last updated: Day 7 — 22 April 2026*
