@@ -13,15 +13,27 @@ import org.springframework.stereotype.Service;
 public class ComplianceService {
 
     private final ComplianceRepository repository;
+    private final EmailService emailService;
 
-    public ComplianceService(ComplianceRepository repository) {
+    public ComplianceService(ComplianceRepository repository,
+                             EmailService emailService) {
         this.repository = repository;
+        this.emailService = emailService;
     }
 
     // CREATE
     public ComplianceRecord createRecord(ComplianceRecord record) {
         validate(record);
-        return repository.save(record);
+        ComplianceRecord saved = repository.save(record);
+
+        // Email (safe - won't crash)
+        emailService.sendEmail(
+                "test@gmail.com",
+                "New Compliance Record Created",
+                "Record created: " + saved.getTitle()
+        );
+
+        return saved;
     }
 
     // GET ALL (PAGINATION)
