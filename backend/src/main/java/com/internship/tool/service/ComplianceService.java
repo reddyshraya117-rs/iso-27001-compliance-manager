@@ -4,9 +4,10 @@ import com.internship.tool.entity.ComplianceRecord;
 import com.internship.tool.exception.ResourceNotFoundException;
 import com.internship.tool.exception.ValidationException;
 import com.internship.tool.repository.ComplianceRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class ComplianceService {
@@ -20,18 +21,44 @@ public class ComplianceService {
     // CREATE
     public ComplianceRecord createRecord(ComplianceRecord record) {
         validate(record);
-        return repository.save(record); // 🔥 real DB save
+        return repository.save(record);
     }
 
-    // GET ALL
-    public List<ComplianceRecord> getAllRecords() {
-        return repository.findAll();
+    // GET ALL (PAGINATION)
+    public Page<ComplianceRecord> getAllRecords(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return repository.findAll(pageable);
     }
 
     // GET BY ID
     public ComplianceRecord getRecordById(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Record not found"));
+    }
+
+    // UPDATE
+    public ComplianceRecord updateRecord(Long id, ComplianceRecord updated) {
+        ComplianceRecord existing = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Record not found"));
+
+        validate(updated);
+
+        existing.setTitle(updated.getTitle());
+        existing.setDescription(updated.getDescription());
+        existing.setStatus(updated.getStatus());
+        existing.setCategory(updated.getCategory());
+        existing.setScore(updated.getScore());
+        existing.setDueDate(updated.getDueDate());
+
+        return repository.save(existing);
+    }
+
+    // DELETE
+    public void deleteRecord(Long id) {
+        ComplianceRecord existing = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Record not found"));
+
+        repository.delete(existing);
     }
 
     // VALIDATION
