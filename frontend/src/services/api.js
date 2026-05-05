@@ -9,4 +9,14 @@ export const fetchAllRecords = async (page = 0, size = 10) => {
   return response.data;
 };
 
+export const createRecord = async (data) => {
+  const response = await api.post(`/api/records`, data);
+  return response.data;
+};
+
+export const updateRecord = async (id, data) => {
+  const response = await api.put(`/api/records/${id}`, data);
+  return response.data;
+};
+
 export default api;
