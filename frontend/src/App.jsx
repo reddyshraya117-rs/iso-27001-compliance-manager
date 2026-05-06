@@ -4,6 +4,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ListPage from "./pages/ListPage";
 import FormPage from "./pages/FormPage";
 import LoginPage from "./pages/LoginPage";
+import DashboardPage from "./pages/DashboardPage";
 
 export default function App() {
   return (
@@ -13,6 +14,14 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route
             path="/"
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/records"
             element={
               <ProtectedRoute>
                 <ListPage />
