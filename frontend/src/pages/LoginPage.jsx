@@ -4,7 +4,7 @@ import { useAuth } from "../AuthContext";
 import axios from "axios";
 
 export default function LoginPage() {
-  const [formData, setFormData] = useState({ username: "", password: "" });
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -16,8 +16,8 @@ export default function LoginPage() {
   };
 
   const handleSubmit = async () => {
-    if (!formData.username.trim() || !formData.password.trim()) {
-      setError("Username and password are required.");
+    if (!formData.email.trim() || !formData.password.trim()) {
+      setError("Email and password are required.");
       return;
     }
     setLoading(true);
@@ -29,7 +29,7 @@ export default function LoginPage() {
       login(response.data.token);
       navigate("/");
     } catch (err) {
-      setError("Invalid username or password.");
+      setError("Invalid email or password.");
     } finally {
       setLoading(false);
     }
@@ -86,21 +86,21 @@ export default function LoginPage() {
 
             <div className="mb-5">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Username
+                Email
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12H8m0 0l4-4m-4 4l4 4M4 6h16M4 18h16" />
                   </svg>
                 </div>
                 <input
-                  type="text"
-                  name="username"
-                  value={formData.username}
+                  type="email"
+                  name="email"
+                  value={formData.email}
                   onChange={handleChange}
                   className="w-full border border-gray-200 rounded-lg pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1B4F8A] focus:border-transparent bg-gray-50"
-                  placeholder="Enter your username"
+                  placeholder="Enter your email"
                 />
               </div>
             </div>
@@ -144,7 +144,14 @@ export default function LoginPage() {
               )}
             </button>
 
-            <p className="text-center text-xs text-gray-400 mt-6">
+            <p className="text-center text-sm text-gray-500 mt-5">
+              Don't have an account?{" "}
+              <a href="/register" className="text-[#1B4F8A] font-medium hover:underline">
+                Create Account
+              </a>
+            </p>
+
+            <p className="text-center text-xs text-gray-400 mt-3">
               Protected by ISO 27001 Security Standards
             </p>
           </div>
