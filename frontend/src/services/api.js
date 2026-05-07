@@ -41,6 +41,13 @@ export const deleteRecord = async (id) => {
   return response.data;
 };
 
+export const exportCSV = async () => {
+  const response = await api.get(`/api/records/export`, {
+    responseType: "blob",
+  });
+  return response.data;
+};
+
 export const askAI = async (question, recordId = null) => {
   const response = await axios.post(
     `${import.meta.env.VITE_AI_URL}/query`,

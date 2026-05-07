@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchAllRecords } from "../services/api";
+import { fetchAllRecords, exportCSV } from "../services/api";
 import { useNavigate } from "react-router-dom";
 import SearchBar from "../components/SearchBar";
 
@@ -54,6 +54,19 @@ export default function ListPage() {
     }
   };
 
+  const handleExportCSV = async () => {
+    try {
+      const blob = await exportCSV();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "compliance-records.csv";
+      a.click();
+    } catch (err) {
+      alert("Export failed. Backend not ready yet.");
+    }
+  };
+
   const SortIcon = ({ column }) => {
     if (sortBy !== column) return <span className="ml-1 text-gray-300">↕</span>;
     return <span className="ml-1">{sortDir === "asc" ? "↑" : "↓"}</span>;
@@ -65,21 +78,31 @@ export default function ListPage() {
 
   return (
     <div className="p-6">
+      {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-[#1B4F8A]">
           ISO 27001 Compliance Records
         </h1>
-        <button
-          onClick={() => navigate("/create")}
-          className="bg-[#1B4F8A] text-white px-4 py-2 rounded hover:bg-blue-800 text-sm"
-        >
-          + Create Record
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handleExportCSV}
+            className="border border-[#1B4F8A] text-[#1B4F8A] px-4 py-2 rounded hover:bg-blue-50 text-sm"
+          >
+            Export CSV
+          </button>
+          <button
+            onClick={() => navigate("/create")}
+            className="bg-[#1B4F8A] text-white px-4 py-2 rounded hover:bg-blue-800 text-sm"
+          >
+            + Create Record
+          </button>
+        </div>
       </div>
 
       {/* Search and Filter Bar */}
       <SearchBar onFilter={handleFilter} />
 
+      {/* Loading */}
       {loading ? (
         <div className="animate-pulse space-y-4">
           {[...Array(5)].map((_, i) => (

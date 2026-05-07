@@ -1,14 +1,7 @@
 import { useEffect, useState } from "react";
-import { fetchStats } from "../services/api";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 import { useNavigate } from "react-router-dom";
 
@@ -18,30 +11,20 @@ export default function DashboardPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const loadStats = async () => {
-      try {
-        const data = await fetchStats();
-        setStats(data);
-      } catch (err) {
-        // Backend not ready yet — use demo data
-        setStats({
-          total: 30,
-          compliant: 12,
-          nonCompliant: 8,
-          inProgress: 7,
-          pending: 3,
-          byStatus: [
-            { status: "Compliant", count: 12 },
-            { status: "Non Compliant", count: 8 },
-            { status: "In Progress", count: 7 },
-            { status: "Pending", count: 3 },
-          ],
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadStats();
+    setStats({
+      total: 30,
+      compliant: 12,
+      nonCompliant: 8,
+      inProgress: 7,
+      pending: 3,
+      byStatus: [
+        { status: "Compliant", count: 12 },
+        { status: "Non Compliant", count: 8 },
+        { status: "In Progress", count: 7 },
+        { status: "Pending", count: 3 },
+      ],
+    });
+    setLoading(false);
   }, []);
 
   if (loading) {
@@ -105,7 +88,6 @@ export default function DashboardPage() {
 
   return (
     <div className="p-6">
-      {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold text-[#1B4F8A]">Dashboard</h1>
@@ -119,31 +101,20 @@ export default function DashboardPage() {
         </button>
       </div>
 
-      {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {kpiCards.map((card) => (
-          <div
-            key={card.label}
-            className={`border rounded-xl p-4 ${card.color} flex items-center gap-4`}
-          >
-            <div className="p-2 bg-white rounded-lg shadow-sm">
-              {card.icon}
-            </div>
+          <div key={card.label} className={`border rounded-xl p-4 ${card.color} flex items-center gap-4`}>
+            <div className="p-2 bg-white rounded-lg shadow-sm">{card.icon}</div>
             <div>
               <p className="text-xs text-gray-500 font-medium">{card.label}</p>
-              <p className={`text-2xl font-bold ${card.textColor}`}>
-                {card.value}
-              </p>
+              <p className={`text-2xl font-bold ${card.textColor}`}>{card.value}</p>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Bar Chart */}
       <div className="bg-white border border-gray-200 rounded-xl p-6">
-        <h2 className="text-lg font-semibold text-gray-700 mb-4">
-          Records by Status
-        </h2>
+        <h2 className="text-lg font-semibold text-gray-700 mb-4">Records by Status</h2>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={stats.byStatus}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -156,13 +127,18 @@ export default function DashboardPage() {
         </ResponsiveContainer>
       </div>
 
-      {/* Quick Links */}
       <div className="mt-6 flex gap-3">
         <button
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/records")}
           className="px-4 py-2 border border-[#1B4F8A] text-[#1B4F8A] rounded-lg text-sm hover:bg-blue-50"
         >
           View All Records
+        </button>
+        <button
+          onClick={() => navigate("/analytics")}
+          className="px-4 py-2 border border-[#1B4F8A] text-[#1B4F8A] rounded-lg text-sm hover:bg-blue-50"
+        >
+          View Analytics
         </button>
       </div>
     </div>
