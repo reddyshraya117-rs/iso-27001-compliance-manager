@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { fetchAllRecords, exportCSV } from "../services/api";
 import { useNavigate } from "react-router-dom";
 import SearchBar from "../components/SearchBar";
+import { SkeletonRow } from "../components/Skeleton";
+import EmptyState from "../components/EmptyState";
 
 export default function ListPage() {
   const [data, setData] = useState([]);
@@ -73,7 +75,19 @@ export default function ListPage() {
   };
 
   if (error) {
-    return <div className="p-6 text-red-500 font-medium">{error}</div>;
+    return (
+      <EmptyState
+        title="Failed to load records"
+        message={error}
+        actionLabel="Retry"
+        onAction={loadData}
+        icon={
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+          </svg>
+        }
+      />
+    );
   }
 
   return (
@@ -102,24 +116,24 @@ export default function ListPage() {
       {/* Search and Filter Bar */}
       <SearchBar onFilter={handleFilter} />
 
-      {/* Loading */}
+      {/* Loading Skeletons */}
       {loading ? (
-        <div className="animate-pulse space-y-4">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-10 bg-gray-200 rounded w-full"></div>
-          ))}
+        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+          <div className="flex gap-4 px-4 py-3 bg-gray-100">
+            <div className="h-4 bg-gray-200 rounded w-8"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+          </div>
+          {[...Array(6)].map((_, i) => <SkeletonRow key={i} />)}
         </div>
       ) : data.length === 0 ? (
-        <div className="text-center text-gray-500 py-16">
-          <p className="text-xl font-semibold">No records found</p>
-          <p className="text-sm mt-2">Try adjusting your filters or create a new record.</p>
-          <button
-            onClick={() => navigate("/create")}
-            className="mt-4 bg-[#1B4F8A] text-white px-4 py-2 rounded hover:bg-blue-800"
-          >
-            Create Record
-          </button>
-        </div>
+        <EmptyState
+          title="No records found"
+          message="Try adjusting your filters or create your first compliance record."
+          actionLabel="+ Create Record"
+          onAction={() => navigate("/create")}
+        />
       ) : (
         <>
           <div className="overflow-x-auto">
