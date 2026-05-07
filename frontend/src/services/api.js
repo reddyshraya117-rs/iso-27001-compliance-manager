@@ -4,8 +4,15 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
 });
 
-export const fetchAllRecords = async (page = 0, size = 10, sortBy = "id", sortDir = "asc") => {
-  const response = await api.get(`/api/records?page=${page}&size=${size}&sortBy=${sortBy}&sortDir=${sortDir}`);
+export const fetchAllRecords = async (page = 0, size = 10, sortBy = "id", sortDir = "asc", search = "", status = "", startDate = "", endDate = "") => {
+  const params = new URLSearchParams({
+    page, size, sortBy, sortDir,
+    ...(search && { search }),
+    ...(status && { status }),
+    ...(startDate && { startDate }),
+    ...(endDate && { endDate }),
+  });
+  const response = await api.get(`/api/records?${params}`);
   return response.data;
 };
 
