@@ -1,1 +1,42 @@
 @import "tailwindcss";
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #F3F6FA;
+  color: #1a1a2e;
+  margin: 0;
+  padding: 0;
+}
+
+button, a, select, input[type="submit"] {
+  min-height: 44px;
+}
+
+:root {
+  --primary: #1B4F8A;
+  --primary-hover: #163d6b;
+}
+
+button, a {
+  transition: all 0.2s ease;
+}
+
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid #1B4F8A;
+  outline-offset: 2px;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #1B4F8A;
+  border-radius: 3px;
+}
