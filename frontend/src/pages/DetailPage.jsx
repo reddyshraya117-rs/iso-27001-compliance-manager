@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchRecordById, deleteRecord } from "../services/api";
+import AiPanel from "../components/AiPanel";
 
 export default function DetailPage() {
   const { id } = useParams();
@@ -167,6 +168,7 @@ export default function DetailPage() {
           </div>
         )}
       </div>
+      <AiPanel recordId={record.id} />
     </div>
   );
 }

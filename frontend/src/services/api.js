@@ -34,4 +34,20 @@ export const deleteRecord = async (id) => {
   return response.data;
 };
 
+export const askAI = async (question, recordId = null) => {
+  const response = await axios.post(
+    `${import.meta.env.VITE_AI_URL}/query`,
+    { question, record_id: recordId }
+  );
+  return response.data;
+};
+
+export const getAIRecommendations = async (data) => {
+  const response = await axios.post(
+    `${import.meta.env.VITE_AI_URL}/recommend`,
+    data
+  );
+  return response.data;
+};
+
 export default api;
