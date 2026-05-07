@@ -9,6 +9,11 @@ export const fetchAllRecords = async (page = 0, size = 10, sortBy = "id", sortDi
   return response.data;
 };
 
+export const fetchRecordById = async (id) => {
+  const response = await api.get(`/api/records/${id}`);
+  return response.data;
+};
+
 export const fetchStats = async () => {
   const response = await api.get(`/api/records/stats`);
   return response.data;
@@ -21,6 +26,11 @@ export const createRecord = async (data) => {
 
 export const updateRecord = async (id, data) => {
   const response = await api.put(`/api/records/${id}`, data);
+  return response.data;
+};
+
+export const deleteRecord = async (id) => {
+  const response = await api.delete(`/api/records/${id}`);
   return response.data;
 };
 

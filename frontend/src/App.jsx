@@ -5,6 +5,7 @@ import ListPage from "./pages/ListPage";
 import FormPage from "./pages/FormPage";
 import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
+import DetailPage from "./pages/DetailPage";
 
 export default function App() {
   return (
@@ -25,6 +26,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ListPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/records/:id"
+            element={
+              <ProtectedRoute>
+                <DetailPage />
               </ProtectedRoute>
             }
           />
